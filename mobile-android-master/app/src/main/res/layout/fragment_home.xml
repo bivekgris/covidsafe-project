@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="au.gov.health.covidsafe.ui.home.HomeFragmentViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/home_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/screen_background">
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:refreshing="@{safeUnbox(viewModel.isRefreshing)}">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fillViewport="true"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <include layout="@layout/fragment_home_header" />
+
+                    <androidx.constraintlayout.widget.Barrier
+                        android:id="@+id/home_header_barrier"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:barrierDirection="bottom"
+                        app:constraint_referenced_ids="header_background" />
+
+                    <include layout="@layout/fragment_home_setup_status_header" />
+
+                    <androidx.constraintlayout.widget.Barrier
+                        android:id="@+id/case_top_barrier"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:barrierDirection="bottom"
+                        app:constraint_referenced_ids="active_status_card" />
+
+                    <include
+                        layout="@layout/fragment_home_case_statistics"
+                        app:viewModel="@{viewModel}" />
+
+                    <androidx.constraintlayout.widget.Barrier
+                        android:id="@+id/header_barrier"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:barrierDirection="bottom"
+                        app:constraint_referenced_ids="case_number_card" />
+
+                    <include layout="@layout/fragment_home_external_links" />
+
+                    <androidx.constraintlayout.widget.Barrier
+                        android:id="@+id/content_barrier"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:barrierDirection="bottom"
+                        app:constraint_referenced_ids="health_link_card_view" />
+
+                    <TextView
+                        android:id="@+id/home_version_number"
+                        style="?textAppearanceBody2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_24"
+                        android:gravity="center"
+                        android:textColor="@color/slate_black_2"
+                        app:layout_constraintTop_toBottomOf="@+id/content_barrier" />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="70dp"
+                        app:layout_constraintTop_toBottomOf="@+id/home_version_number" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </ScrollView>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <LinearLayout
+            android:id="@+id/app_update_reminder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            tools:visibility="visible">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/space_12"
+                android:background="@color/error_red" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black"
+            android:alpha="@{(viewModel.collectionMessageVisible || viewModel.visibleSelectStateLayout) ? 0.7f : 0.0f}" />
+
+        <FrameLayout
+            android:id="@+id/layout_collection_message"
+            android:layout_width="290dp"
+            android:layout_height="wrap_content"
+            app:layout_anchor="@+id/swipeRefreshLayout"
+            app:layout_anchorGravity="center"
+            android:background="@color/white"
+            android:elevation="12dp"
+            visibility="@{viewModel.collectionMessageVisible}"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp">
+
+                <TextView
+                    android:id="@+id/txt_collection_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:textColor="#141515"
+                    style="?textAppearanceBody1"
+                    android:textAlignment="center"
+                    android:lineSpacingExtra="5dp"
+                    android:textSize="16sp"
+                    android:text="@string/collection_message" />
+
+                <TextView
+                    android:id="@+id/txt_location_permission"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:textColor="#141515"
+                    style="?textAppearanceBody1"
+                    android:textAlignment="center"
+                    android:lineSpacingExtra="5dp"
+                    android:textSize="16sp"
+                    android:text="@string/update_screen_location" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/lighter_green"
+                    android:foreground="?selectableItemBackground"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:id="@+id/txt_proceed"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="@color/dark_green"
+                        android:text="@string/permission_button"
+                        tools:text="Proceed" />
+
+                </FrameLayout>
+            </LinearLayout>
+        </FrameLayout>
+        <FrameLayout
+                android:id="@+id/layout_herald_upgrade"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_anchor="@+id/swipeRefreshLayout"
+                app:layout_anchorGravity="center"
+                android:background="@color/white"
+                android:elevation="12dp"
+                visibility="@{viewModel.heraldUpgradeMessage}">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingStart="@dimen/space_32"
+                        android:paddingEnd="@dimen/space_32"
+                        android:paddingTop="@dimen/space_40"
+                        android:scrollbarStyle="outsideInset"
+                        android:scrollbars="vertical">
+
+                        <ImageView
+                            android:id="@+id/permission_img"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_permission"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/txt_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_8"
+                            android:text="@string/update_heading_android"
+                            android:textAlignment="viewStart"
+                            android:textAppearance="?textAppearanceHeadline1"
+                            android:textSize="28sp"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/permission_img" />
+
+                        <TextView
+                            android:id="@+id/txt_update_description"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_16"
+                            android:layout_marginBottom="@dimen/space_16"
+                            android:text="@string/update_description_android"
+                            android:textAlignment="viewStart"
+                            style="?textAppearanceBody1"
+                            android:textSize="16sp"
+                            android:lineHeight="@dimen/space_24"
+                            android:linksClickable="true"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/txt_title" />
+
+                        <Button
+                            android:id="@+id/btn_proceed"
+                            style="?attr/textAppearanceButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_40"
+                            android:layout_marginBottom="@dimen/space_32"
+                            android:layout_weight="1"
+                            android:text="@string/permission_button"
+                            app:layout_constraintTop_toBottomOf="@+id/txt_update_description"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </ScrollView>
+        </FrameLayout>
+        <FrameLayout
+            android:id="@+id/select_state_layout"
+            android:layout_width="290dp"
+            android:layout_height="wrap_content"
+            app:layout_anchor="@+id/swipeRefreshLayout"
+            android:paddingTop="@dimen/space_16"
+            app:layout_anchorGravity="center"
+            android:background="@color/white"
+            android:elevation="12dp"
+            android:visibility="gone">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:animateLayoutChanges="true">
+
+                <TextView
+                    android:id="@+id/title_select_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:text="@string/select_state_territory_heading" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/select_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_24" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/grey4"
+                    android:layout_marginTop="@dimen/space_12"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:textSize="16sp"
+                        android:paddingEnd="50dp"
+                        android:text="Cancel"
+                        android:textStyle="bold"
+                        android:onClick="@{() -> viewModel.showSelectSate(false)}"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:paddingStart="50dp"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:text="Select"
+                        android:onClick="@{() -> viewModel.selectState()}"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </FrameLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>

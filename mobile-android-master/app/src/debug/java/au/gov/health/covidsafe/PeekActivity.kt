@@ -1,0 +1,245 @@
+package au.gov.health.covidsafe
+
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import au.gov.health.covidsafe.extensions.fromHtml
+import au.gov.health.covidsafe.logging.CentralLog
+import au.gov.health.covidsafe.preference.Preference
+import au.gov.health.covidsafe.streetpass.persistence.StreetPassRecordStorage
+import au.gov.health.covidsafe.streetpass.view.RecordViewModel
+import au.gov.health.covidsafe.ui.utils.Utils
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.database_peek.*
+import org.json.JSONObject
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
+
+private const val TAG = "PeekActivity"
+
+class PeekActivity : AppCompatActivity() {
+
+    private lateinit var viewModel: RecordViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        newPeek()
+        expToken()
+    }
+
+    private fun newPeek() {
+        setContentView(R.layout.database_peek)
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerview)
+        val adapter = RecordListAdapter(this)
+        recyclerView.adapter = adapter
+        val layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = layoutManager
+
+        val dividerItemDecoration = DividerItemDecoration(
+                recyclerView.context,
+                layoutManager.orientation
+        )
+        recyclerView.addItemDecoration(dividerItemDecoration)
+
+        viewModel = ViewModelProvider(this).get(RecordViewModel::class.java)
+        viewModel.allRecords.observe(this, Observer { records ->
+            adapter.setSourceData(records)
+        })
+
+
+        val start = findViewById<FloatingActionButton>(R.id.start)
+        start.setOnClickListener {
+            startService()
+        }
+
+        val stop = findViewById<FloatingActionButton>(R.id.stop)
+        stop.setOnClickListener {
+            stopService()
+        }
+
+        val delete = findViewById<FloatingActionButton>(R.id.delete)
+        delete.setOnClickListener { view ->
+            view.isEnabled = false
+
+            val builder = AlertDialog.Builder(this)
+            builder
+                    .setTitle("Are you sure?")
+                    .setCancelable(false)
+                    .setMessage("Deleting the DB records is irreversible")
+                    .setPositiveButton("DELETE") { dialog, _ ->
+                        Observable.create<Boolean> {
+                            StreetPassRecordStorage(this).nukeDb()
+                            it.onNext(true)
+                        }
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeOn(Schedulers.io())
+                                .subscribe { result ->
+                                    Toast.makeText(this, "Database nuked: $result", Toast.LENGTH_SHORT)
+                                            .show()
+                                    view.isEnabled = true
+                                    dialog.cancel()
+                                }
+                    }
+
+                    .setNegativeButton("DON'T DELETE") { dialog, _ ->
+                        view.isEnabled = true
+                        dialog.cancel()
+                    }
+
+            val dialog: AlertDialog = builder.create()
+            dialog.show()
+
+        }
+
+
+        shareDatabase.setOnClickListener {
+            val authority = "${BuildConfig.APPLICATION_ID}.fileprovider"
+            val databaseFilePath = getDatabasePath("record_database").absolutePath
+            val databaseFile = File(databaseFilePath)
+
+            CentralLog.d(TAG, "authority = $authority, databaseFilePath = $databaseFilePath")
+
+            if (databaseFile.exists()) {
+                CentralLog.d(TAG, "databaseFile.length = ${databaseFile.length()}")
+
+                FileProvider.getUriForFile(
+                        this,
+                        authority,
+                        databaseFile
+                )?.let { databaseFileUri ->
+                    CentralLog.d(TAG, "databaseFileUri = $databaseFileUri")
+
+                    val intent = Intent(Intent.ACTION_SEND)
+                    intent.type = "application/octet-stream"
+                    intent.putExtra(Intent.EXTRA_STREAM, databaseFileUri)
+                    startActivity(Intent.createChooser(intent, "Sharing database"))
+                }
+            }
+        }
+
+        showPushTokenOnDebugBuild()
+
+        if (!BuildConfig.DEBUG) {
+            start.visibility = View.GONE
+            stop.visibility = View.GONE
+            delete.visibility = View.GONE
+        }
+        btn_de_active_token.setOnClickListener {
+            Preference.putEncrypterJWTToken(this, "123456789" )
+        }
+        turnSensor()
+    }
+
+    private fun expToken() {
+        val token = Preference.getEncrypterJWTToken(applicationContext)
+        val refreshToken = Preference.getEncryptRefreshToken(applicationContext)
+
+        val tokenSeparate = token?.split(".")
+        var subjectItem: String? = null
+        if (tokenSeparate?.size !=null && tokenSeparate.size >= 3) {
+            subjectItem = tokenSeparate.let {
+                it[1]
+            }
+        }
+
+        var subjectByte: ByteArray? = null
+        subjectItem?.let { subjectByte =  android.util.Base64.decode(subjectItem, android.util.Base64.DEFAULT)}
+        val charset = Charsets.UTF_8
+
+        subjectByte?.let {
+            val jsonModel = String(it, charset)
+            val jsonObj = JSONObject(jsonModel)
+
+            val dateObj = Date(jsonObj.get("exp").toString().toLong() * 1000)
+            val subjectId = jsonObj.get("sub").toString()
+
+            val dateString = SimpleDateFormat("dd-MM-yyyy hh:mm:ss a").format(dateObj)
+            token_exp.text = "Token Expire in: $dateString"
+            device_id.text = "Device ID: $subjectId"
+        }
+
+        // Refresh Token
+        val refreshTokenSeparate = refreshToken?.split(".")
+        var item: String? = null
+        if (refreshTokenSeparate?.size !=null && refreshTokenSeparate.size >= 3) {
+            item = refreshTokenSeparate.let {
+                it[1]
+            }
+        }
+
+        refresh_token_exp.text = "Refresh Token Expire in: N/A"
+        var itemByte: ByteArray? = null
+        item?.let { itemByte =  android.util.Base64.decode(item, android.util.Base64.DEFAULT)}
+        itemByte?.let {
+            val jsonModel = String(it, charset)
+            val jsonObj = JSONObject(jsonModel)
+
+            val dateObj = Date(jsonObj.get("exp").toString().toLong() * 1000)
+
+            val dateString = SimpleDateFormat("yyyy-MM-dd").format(dateObj)
+            token_exp.text = "Refresh Token Expire in: " +  dateString
+        }
+    }
+    private fun turnSensor() {
+        switch_sensor.isChecked =  !Preference.getAdvertiseStop(this)
+        switch_sensor.setOnCheckedChangeListener { _, isChecked ->
+           if (isChecked) {
+               Preference.setAdvertiseStop(applicationContext, false)
+               Utils.startSensor(this)
+           } else {
+               Preference.setAdvertiseStop(applicationContext, true)
+               Utils.stopSensor(this)
+           }
+        }
+    }
+
+    private fun showPushTokenOnDebugBuild() {
+        if (BuildConfig.DEBUG) {
+            val token = Preference.getFirebaseInstanceID(this)
+            home_push_notification_token.run {
+                visibility = View.VISIBLE
+                val tokenText = "<b>Firebase Push Token:</b> $token"
+                text = fromHtml(tokenText)
+            }
+
+        } else {
+            home_push_notification_token.visibility = View.GONE
+        }
+    }
+
+    private var timePeriod: Int = 0
+
+    private fun nextTimePeriod(): Int {
+        timePeriod = when (timePeriod) {
+            1 -> 3
+            3 -> 6
+            6 -> 12
+            12 -> 24
+            else -> 1
+        }
+
+        return timePeriod
+    }
+
+    private fun startService() {
+//         Utils.startBluetoothMonitoringService(this)
+    }
+
+    private fun stopService() {
+        Utils.stopBluetoothMonitoringService(this)
+    }
+}

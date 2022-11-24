@@ -1,0 +1,48 @@
+<resources>
+
+    <style name="word_title">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Large</item>
+    </style>
+
+    <style name="HelpToolbarStyle" parent="Widget.MaterialComponents.Toolbar">
+        <item name="titleTextAppearance">@style/ToolbarTitle</item>
+        <item name="contentInsetStartWithNavigation">0dp</item>
+    </style>
+
+    <style name="ToolbarTitle" parent="@style/TextAppearance.MyTheme.Headline1">
+        <item name="android:fontFamily">@font/font_roboto_regular</item>
+    </style>
+
+    <style name="ToolbarStyle.TitleTextStyle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="titleTextAppearance">@style/ToolbarTitle</item>
+        <item name="contentInsetStartWithNavigation">0dp</item>
+        <item name="android:textSize">@dimen/text_size_28</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="countryListIndex">
+        <item name="android:textColor">@color/dark_green</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:layout_width">@dimen/keyline_8</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_height">18dp</item>
+    </style>
+
+    <style name="otpStyle">
+        <item name="android:layout_width">200dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/keyline_5</item>
+        <item name="android:layout_marginBottom">@dimen/keyline_5</item>
+        <item name="android:maxLength">6</item>
+        <item name="android:textSize">36sp</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textColor">@color/dark_green</item>
+        <item name="android:inputType">numberDecimal</item>
+        <item name="android:background">@drawable/edit_text_black_background</item>
+    </style>
+
+</resources>

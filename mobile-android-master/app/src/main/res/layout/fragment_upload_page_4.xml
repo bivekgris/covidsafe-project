@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/keyline_5"
+            android:layout_marginTop="@dimen/keyline_4"
+            android:layout_marginEnd="@dimen/keyline_5"
+            android:text="@string/upload_step_4_header"
+            android:textAppearance="?textAppearanceHeadline2" />
+
+        <TextView
+            android:id="@+id/subHeader"
+            style="?attr/textAppearanceBody2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/keyline_5"
+            android:layout_marginTop="@dimen/keyline_4"
+            android:layout_marginEnd="@dimen/keyline_5"
+            android:text="@string/upload_step_4_sub_header" />
+
+        <TextView
+            style="?attr/textAppearanceBody2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/keyline_5"
+            android:layout_marginTop="@dimen/keyline_4"
+            android:layout_marginEnd="@dimen/keyline_5"
+            android:text="@string/consent_call_for_action" />
+    </LinearLayout>
+
+
+</ScrollView>

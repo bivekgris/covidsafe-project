@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/keyline_7"
+    tools:context=".ui.onboarding.OnboardingActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationContentDescription="@string/navigation_back_button_content_description"
+        app:navigationIcon="@drawable/ic_up" />
+
+    <View
+        android:id="@+id/toolbarReplacer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/keyline_4"/>
+
+    <TextView
+        android:id="@+id/textViewSteps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/keyline_5"
+        android:text="@string/stepCounter"
+        android:textAppearance="?textAppearanceBody1"/>
+
+    <fragment
+        android:id="@+id/fragment_nav_host"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        app:defaultNavHost="true"/>
+
+    <FrameLayout
+        android:id="@+id/loadingProgressBarFrame"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:animateLayoutChanges="true"
+        android:background="#80000000"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ProgressBar
+            android:id="@+id/loadingProgressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:visibility="visible" />
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/onboarding_next"
+        style="?textAppearanceButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/keyline_5"
+        android:layout_marginTop="@dimen/keyline_5"
+        android:layout_marginEnd="@dimen/keyline_5"
+        android:text="@string/intro_button" />
+
+    <TextView
+        android:id="@+id/non_consent"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center"
+        android:layout_marginStart="@dimen/keyline_5"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="@dimen/keyline_5"
+        android:background="@drawable/background_red"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:text="@string/non_consent_button" />
+
+    <TextView
+        android:id="@+id/onboarding_next_secondary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/keyline_5"
+        android:layout_marginTop="@dimen/keyline_5"
+        android:layout_marginEnd="@dimen/keyline_5"
+        android:gravity="center_horizontal"
+        android:textAppearance="?textAppearanceBody1"
+        android:textColor="@color/dark_green"/>
+
+</LinearLayout>
